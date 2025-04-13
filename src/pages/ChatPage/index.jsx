@@ -19,6 +19,8 @@ const ChatPage = () => {
   const [token, setToken] = useState(null);
   const [typingUser, setTypingUser] = useState("");
 
+
+  // Refs-------
   const socketRef = useRef();
   const fileInputRef = useRef();
 
@@ -27,6 +29,11 @@ const ChatPage = () => {
     UseFileUpload(socketRef, SOCKET_SERVER_URL);
 
   const navigate = useNavigate();
+
+  //all chat messages
+  const allChatData = [...messages, ...files].sort(
+    (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
+  );
 
   useEffect(() => {
     socketRef.current = socketIOClient(SOCKET_SERVER_URL);
@@ -93,6 +100,8 @@ const ChatPage = () => {
       });
     });
 
+    
+
     return () => {
       socketRef.current.disconnect();
     };
@@ -135,10 +144,7 @@ const ChatPage = () => {
     }
   };
 
-  //all chat messages
-  const allChatData = [...messages, ...files].sort(
-    (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
-  );
+  
 
   return (
     <div className="flex flex-col items-center  h-screen bg-gray-200">
@@ -150,7 +156,7 @@ const ChatPage = () => {
           </Link>
         </h2>
       </div>
-      <div className="w-[80%] h-[80%] p-2 overflow-hidden">
+      <div className="w-[80%] h-[79%] p-2 overflow-hidden ">
         {/* typing.. */}
         {/* <div className=' py-1 px-3 bg-gray-300 mb-2'>
           {currentUser && <p>{currentUser?.username} is typing...</p>}
@@ -165,11 +171,13 @@ const ChatPage = () => {
             const renderFile = () => {
               if (msg.mimeType?.startsWith("image/")) {
                 return (
-                  <img
-                    src={msg.fileUrl}
-                    alt={msg.originalName}
-                    className="max-w-[15vw] max-h-[15vw] rounded shadow"
-                  />
+                  <a href={msg.fileUrl} target="_blank">
+                    <img
+                      src={msg.fileUrl}
+                      alt={msg.originalName}
+                      className="max-w-[15vw] max-h-[15vw] rounded shadow"
+                    />
+                  </a>
                 );
               } else if (msg.mimeType === "application/pdf") {
                 return (
@@ -190,7 +198,7 @@ const ChatPage = () => {
                     rel="noopener noreferrer"
                     className="text-gray-600 underline"
                   >
-                    📁 {msg.originalName}
+                    <i class="ri-video-fill"></i> {msg.originalName}
                   </a>
                 );
               }
@@ -232,14 +240,15 @@ const ChatPage = () => {
               </div>
             );
           })}
+
         </div>
       </div>
 
       {/* input massages.. */}
-      <div className="flex justify-between absolute bottom-6 bg-white w-[80%]  px-8 rounded-4xl outline outline-black">
-        <form action="" className="w-full flex" onSubmit={sendMessage}>
+      <div className="flex justify-between absolute bottom-6 bg-white w-[80%]  px-4 rounded-sm outline outline-black">
+        <form  className="w-full flex items-center" onSubmit={sendMessage}>
           <input
-            className="w-[70%] focus:outline-none  py-4 px-2 text-wrap"
+            className="w-[80%] focus:outline-none  py-4 px-2 text-wrap"
             type="text"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
@@ -248,79 +257,32 @@ const ChatPage = () => {
 
           {/* previews--------------------------------------------- */}
           <div className="flex flex-wrap gap-4 my-4">
-            {/* {preview.map((file, index) => {
-              if (file.type === "image") {
-                return (
-                  <div className="relative">
-                    <img
-                      key={index}
-                      src={file.src}
-                      alt={file.name}
-                      className="w-[6vw] h-[4vw] rounded shadow"
-                    />
-                    <button type="button" className="absolute text-[.8vw] h-[1.2vw] w-[1.2vw] flex items-center justify-center p-2  right-[0.2vw] top-[0.2vw] rounded-full bg-black text-white cursor-pointer">
-                      X
-                    </button>
-                  </div>
-                );
-              } else if (file.type === "pdf") {
-                return (
-                  <div
-                    key={index}
-                    className="w-[6vw] h-[4vw] flex flex-col items-center justify-center border rounded p-2 bg-red-300 relative"
-                  >
-                    <span role="img" aria-label="pdf" className="text-[1.2vw]">
-                      📄
-                    </span>
-                    <p className="text-center mt-2 text-[.6vw]">{file.name}</p>
-                    <button type="button" className="absolute text-[.8vw] h-[1.2vw] w-[1.2vw] flex items-center justify-center p-2  right-[0.2vw] top-[0.2vw] rounded-full bg-black text-white cursor-pointer">
-                      X
-                    </button>
-                  </div>
-                );
-              } else {
-                return (
-                  <div
-                    key={index}
-                    className="w-[6vw] h-[4vw] flex flex-col items-center justify-center border rounded p-2 bg-blue-300 relative"
-                  >
-                    <span role="img" aria-label="file" className="text-[1.2vw]">
-                      📁
-                    </span>
-                    <p className="text-center mt-2 text-[.3vw] text-wrap">
-                      {file.name}
-                    </p>
-                    <button type="button" className="absolute text-[.8vw] h-[1.2vw] w-[1.2vw] flex items-center justify-center p-2  right-[0.2vw] top-[0.2vw] rounded-full bg-black text-white cursor-pointer">
-                      X
-                    </button>
-                  </div>
-                );
-              }
-            })} */}
-
             {preview.map((file, index) => (
-              <div key={index} className="mx-2 my-2 relative w-[8vw] h-[6vw]">
+              <div key={index} className="mx-2 my-2 relative w-[8vw] h-[6vw] ">
                 {file.type === "image" && (
                   <img
                     src={file.src}
                     alt={file.name}
-                    className="w-[100%] h-[100%] "
+                    className="w-[100%] h-[100%] rounded-lg"
                   />
                 )}
                 {file.type === "video" && (
                   <video
                     src={file.src}
                     controls
-                    className="w-[100%] h-[100%] "
+                    className="w-[100%] h-[100%] rounded-lg"
                   />
                 )}
                 {file.type === "pdf" && (
-                  <p className="w-[100%] h-[100%] text-[1vw] ">
+                  <p className="w-[100%] h-[100%] text-[1vw] bg-rose-400 p-2 rounded-lg">
                     {file.name} (PDF)
+                    <i class="ri-file-pdf-2-line"></i>
                   </p>
                 )}
                 {file.type === "other" && (
-                  <p className="w-[100%] h-[100%] ">{file.name} (Other)</p>
+                  <p className="w-[100%] h-[100%] rounded-lg">
+                    {file.name} (Other)
+                  </p>
                 )}
 
                 <button
@@ -334,16 +296,26 @@ const ChatPage = () => {
             ))}
           </div>
 
-          <input
-            className="w-[20%] focus:outline-none text-sm  py-4 px-2"
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileChange}
-            multiple
-          />
+          <div className="w-[5%] focus:outline-none text-sm  py-4 px-2 flex items-center justify-center ">
+            <input
+              className="hidden"
+              id="inputFile"
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              multiple
+            />
+            <label
+              className="text-[2vw] cursor-pointer hover:text-green-600 hover:font-bold "
+              htmlFor="inputFile"
+            >
+              <i class="ri-file-upload-line"></i>
+            </label>
+          </div>
+
           <button
             type="submit"
-            className="w-[10%] cursor-pointer hover:font-bold"
+            className="w-[15%] cursor-pointer hover:font-bold bg-black text-white py-2 rounded-lg"
             onClick={sendMessage}
           >
             Send <i className="ri-send-plane-fill"></i>
