@@ -7,7 +7,6 @@ import { AllUsersContext } from "../../Context/AllUsersProvider";
 
 const Home = () => {
   const {allUsers}=useContext(AllUsersContext);
-  console.log('allUsers =>', allUsers)
   return <div>
     <Header />
     <nav className="flex item-center justify-between gap-2 px-6 py-1 bg-black">

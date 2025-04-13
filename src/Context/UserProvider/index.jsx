@@ -21,7 +21,6 @@ const UserProvider = ({children})=>{
             "Authorization": `Bearer ${accessToken}`
           }
         })
-        console.log(response.data.user);
 
         if(response.data.status === 'success'){
           setUserData(response.data.user);
