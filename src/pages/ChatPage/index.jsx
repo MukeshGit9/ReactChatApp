@@ -79,6 +79,7 @@ const ChatPage = () => {
       const { status, data } = formattedMessage.formattedMessage;
       if (status === "success" && data) {
         setMessages((prevMessages) => [...prevMessages, data]);
+        socketRef.current.emit("mark_as_delivered", data.messageId);
       } else {
         alert("message not found");
       }
@@ -89,9 +90,17 @@ const ChatPage = () => {
       const { data, status } = fileMessage.fileMessage;
       if (status === "success" && data) {
         setFiles((prevFile) => [...prevFile, data]);
+        socketRef.current.emit("mark_as_delivered", data.messageId);
       } else {
         alert("Files not found");
       }
+    });
+
+    // listen message status-------------------------------------------------------------LISTEN MESSAGE STATUS
+    socketRef.current.on("message_status_update", ({ messageId, status }) => {
+      setMessages((prev) =>
+        prev.map((m) => (m.messageId === messageId ? { ...m, status } : m))
+      );
     });
 
     //handle typing indicator-------------------------------------------------------------TYPING INDICATOR
@@ -159,6 +168,8 @@ const ChatPage = () => {
     });
   };
 
+  // message status request--------------------------------------------------------------------MESSAGE STATUS READ, SENT, DELEVIRED
+
   return (
     <div className="flex flex-col items-center  h-screen bg-gray-200">
       <Header />
@@ -194,6 +205,13 @@ const ChatPage = () => {
                       alt={msg.originalName}
                       className="max-w-[15vw] max-h-[15vw] rounded shadow  "
                     />
+                    {isCurrentUser && (
+                      <span className="absolute bottom-[-0.7vw] text-[.5vw] bg-black text-white  right-0 px-1 rounded-sm">
+                        {msg.status === "sent" && "0"}
+                        {msg.status === "delivered" && "0 0"}
+                        {msg.status === "read" && "0 0 0"}
+                      </span>
+                    )}
                     {isCurrentUser ? (
                       <button
                         onClick={(e) => {
@@ -201,7 +219,7 @@ const ChatPage = () => {
                           e.stopPropagation(); // stop bubbling up
                           handleDeleteMessage(msg.messageId, msg.senderId);
                         }}
-                        className="text-red-500 text-xs ml-2 absolute top-[-.5vw] right-[0vw] z-0 bg-red-500 rounded-sm flex items-center justify-center p-[.2vw] cursor-pointer"
+                        className="text-red-500 text-xs ml-2 absolute top-[-.8vw] right-[0vw] z-0 bg-red-500 rounded-sm flex items-center justify-center p-[.2vw] cursor-pointer"
                       >
                         <i className="ri-delete-bin-6-line text-[.6vw] text-white"></i>
                       </button>
@@ -219,6 +237,13 @@ const ChatPage = () => {
                     className="text-blue-500 underline relative inline-block"
                   >
                     📄 View PDF
+                    {isCurrentUser && (
+                      <span className="absolute bottom-[-0.7vw] text-[.5vw] bg-black text-white  right-0 px-1 rounded-sm">
+                        {msg.status === "sent" && "0"}
+                        {msg.status === "delivered" && "0 0"}
+                        {msg.status === "read" && "0 0 0"}
+                      </span>
+                    )}
                     {isCurrentUser ? (
                       <button
                         onClick={(e) => {
@@ -226,7 +251,7 @@ const ChatPage = () => {
                           e.stopPropagation(); // stop bubbling up
                           handleDeleteMessage(msg.messageId, msg.senderId);
                         }}
-                        className="text-red-500 text-xs ml-2 absolute top-[-.5vw] right-[0vw] z-0 bg-red-500 rounded-sm flex items-center justify-center p-[.2vw] cursor-pointer"
+                        className="text-red-500 text-xs ml-2 absolute top-[-.8vw] right-[0vw] z-0 bg-red-500 rounded-sm flex items-center justify-center p-[.2vw] cursor-pointer"
                       >
                         <i className="ri-delete-bin-6-line text-[.6vw] text-white"></i>
                       </button>
@@ -244,6 +269,13 @@ const ChatPage = () => {
                     className="text-gray-600 underline inline-block relative"
                   >
                     <i class="ri-video-fill"></i> {msg.originalName}
+                    {isCurrentUser && (
+                      <span className="absolute bottom-[-0.7vw] text-[.5vw] bg-black text-white  right-0 px-1 rounded-sm">
+                        {msg.status === "sent" && "0"}
+                        {msg.status === "delivered" && "0 0"}
+                        {msg.status === "read" && "0 0 0"}
+                      </span>
+                    )}
                     {isCurrentUser ? (
                       <button
                         onClick={(e) => {
@@ -251,7 +283,7 @@ const ChatPage = () => {
                           e.stopPropagation(); // stop bubbling up
                           handleDeleteMessage(msg.messageId, msg.senderId);
                         }}
-                        className="text-red-500 text-xs ml-2 absolute top-[-.5vw] right-[0vw] z-0 bg-red-500 rounded-sm flex items-center justify-center p-[.2vw] cursor-pointer"
+                        className="text-red-500 text-xs ml-2 absolute top-[-.8vw] right-[0vw] z-0 bg-red-500 rounded-sm flex items-center justify-center p-[.2vw] cursor-pointer"
                       >
                         <i className="ri-delete-bin-6-line text-[.6vw] text-white"></i>
                       </button>
@@ -266,7 +298,7 @@ const ChatPage = () => {
             return (
               <div
                 key={msg.messageId}
-                className={`p-1 mb-2 flex gap-2  ${
+                className={`p-1 mb-6 flex gap-2  ${
                   isCurrentUser ? "justify-end w-[100%]" : "justify-start"
                 } justify-self-${isCurrentUser ? "end" : "start"}`}
               >
@@ -280,11 +312,18 @@ const ChatPage = () => {
                         <ReactMarkdown rehypePlugins={[rehypeSanitize]}>
                           {msg.content}
                         </ReactMarkdown>
+                        {isCurrentUser && (
+                          <span className="absolute bottom-[-0.7vw] text-[.5vw] bg-black text-white  right-0 px-1 rounded-sm">
+                            {msg.status === "sent" && "0"}
+                            {msg.status === "delivered" && "0 0"}
+                            {msg.status === "read" && "0 0 0"}
+                          </span>
+                        )}
                         <button
                           onClick={() =>
                             handleDeleteMessage(msg.messageId, msg.senderId)
                           }
-                          className="text-red-500 text-xs ml-2 absolute top-[-.5vw] right-[0vw] z-0 bg-red-500 rounded-sm flex items-center justify-center p-[.2vw] cursor-pointer"
+                          className="text-red-500 text-xs ml-2 absolute top-[-.8vw] right-[0vw] z-0 bg-red-500 rounded-sm flex items-center justify-center p-[.2vw] cursor-pointer"
                         >
                           <i className="ri-delete-bin-6-line text-[.6vw] text-white"></i>
                         </button>
