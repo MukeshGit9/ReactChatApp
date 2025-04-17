@@ -99,7 +99,8 @@ const UseFileUpload = (socketRef, SOCKET_SERVER_URL) => {
     preview,
     handleFileChange,
     handleUpload,
-    setPreview
+    setPreview,
+    setSelectedFile
   };
 };
 
