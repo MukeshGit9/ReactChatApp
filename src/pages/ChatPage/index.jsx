@@ -253,7 +253,7 @@ const ChatPage = () => {
     <div className="flex flex-col items-center  h-screen bg-gray-300">
       <Header />
       <div className="flex justify-end items-center w-full bg-white py-2 px-6">
-        <h2 className="text-xl text-blue-700 font-bold">
+        <h2 className="text-xl text-[#00baff] font-bold">
           <Link to="/profile" path={<Profile />}>
             <i className="ri-user-6-fill"></i> {currentUser}
           </Link>
@@ -481,7 +481,7 @@ const ChatPage = () => {
           </div>
 
           <form
-            className="w-full flex flex-col items-center justify-between p-4"
+            className="w-full flex flex-col items-center justify-between px-4"
             onSubmit={sendMessage}
           >
             {/* <div className="w-full focus:outline-none  py-4 px-2 text-wrap">

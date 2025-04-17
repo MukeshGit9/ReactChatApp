@@ -41,7 +41,7 @@ const Home = () => {
           return (
             <div
               key={data.id}
-              className="group flex gap-1 items-center justify-center border border-black py-2 px-4 rounded-full hover:bg-black cursor-pointer"
+              className="group flex gap-1 items-center justify-center border border-black py-2 px-4 rounded-sm hover:bg-black cursor-pointer"
               onClick={() => handleClick(data)}
             >
               <img
