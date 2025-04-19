@@ -90,6 +90,8 @@ const ChatPage = () => {
   useEffect(() => {
     socketRef.current = socketIOClient(SOCKET_SERVER_URL);
 
+    // socketRef.current.emit("add_user", currentUserEmail); // ✅ important!
+
     //authenticate user via token---------------------------------------------------------AUTH via TOKEN
     const token = localStorage.getItem("auth_token");
     if (token) {
@@ -102,7 +104,7 @@ const ChatPage = () => {
         // fetch previous messages------------------------------------------------FETCH prev messages
         axios
           .get(
-            `${SOCKET_SERVER_URL}/messages?userId=${email}&receiveId=${selectedUser.email}`
+            `${SOCKET_SERVER_URL}/messages?userId=${email}&receiveId=${selectedUser?.email}`
           )
           .then((response) => {
             if (response.data.status === "success") {
@@ -114,7 +116,7 @@ const ChatPage = () => {
         // fetch previous files-----------------------------------------------------FETCH prev files
         axios
           .get(
-            `${SOCKET_SERVER_URL}/files?userId=${email}&receiveId=${selectedUser.email}`
+            `${SOCKET_SERVER_URL}/files?userId=${email}&receiveId=${selectedUser?.email}`
           )
           .then((response) => {
             if (response.data.status === "success") {
@@ -132,8 +134,8 @@ const ChatPage = () => {
       const { status, data } = formattedMessage.formattedMessage;
       if (status === "success" && data) {
         if (
-          data.senderId === selectedUser.email ||
-          data.receiverId === selectedUser.email
+          data.senderId === selectedUser?.email ||
+          data.receiverId === selectedUser?.email
         ) {
           setMessages((prevMessages) => [...prevMessages, data]);
         } else {
@@ -150,8 +152,8 @@ const ChatPage = () => {
       const { data, status } = fileMessage.fileMessage;
       if (status === "success" && data) {
         if (
-          data.senderId === selectedUser.email ||
-          data.receiverId === selectedUser.email
+          data.senderId === selectedUser?.email ||
+          data.receiverId === selectedUser?.email
         ) {
           setFiles((prevFile) => [...prevFile, data]);
         } else {
@@ -198,7 +200,7 @@ const ChatPage = () => {
   const sendMessage = async (e) => {
     e.preventDefault();
     // const receivedId = "receiver_mail@example.com"; //update receiver logic
-    const receivedId = selectedUser.email; //update receiver logic
+    const receivedId = selectedUser?.email; //update receiver logic
 
     if (message.trim()) {
       const formattedMessage = {
@@ -473,15 +475,15 @@ const ChatPage = () => {
 
         {/* input massages.. */}
         <div className="flex flex-col justify-between  bottom-6 bg-gray-100 w-[40%] h-full  overflow-y-auto  rounded-sm   ">
-          <div>
+          {/* call component--------------------------------------------------------- */}
             <CallComponent
-              currentUser={currentUser}
-              users={allUsers} // should include peerId info
+              socketRef = {socketRef.current}
+              selectedUser={selectedUser?.email}
+              currentUserEmail={currentUserEmail}
             />
-          </div>
 
           <form
-            className="w-full flex flex-col items-center justify-between px-4"
+            className="w-full flex flex-col items-center justify-between px-2"
             onSubmit={sendMessage}
           >
             {/* <div className="w-full focus:outline-none  py-4 px-2 text-wrap">
@@ -493,7 +495,8 @@ const ChatPage = () => {
             </div> */}
 
             <textarea
-              className="w-[100%] h-[50%] focus:outline-none  py-4 px-2 text-wrap bg-white"
+              className="w-[100%]  focus:outline-none  py-4 px-2 text-wrap bg-white"
+              rows={4}
               type="text"
               value={message}
               onChange={(e) => setMessage(e.target.value)}

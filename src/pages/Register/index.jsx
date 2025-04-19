@@ -48,17 +48,21 @@ const Register = () => {
   };
 
   return (
-    <div className="flex w-full h-screen justify-center items-center bg-[#00baff]">
-      <div className="w-[50%] px-6   items-center justify-center text-[10vw] text-white  relative">
-        <i className="ri-chat-smile-3-fill text-[12vw] absolute top-[-60%] text-black right-0"></i>
-        connecText
-        <p className="text-[1.8vw] absolute bottom-0 ml-2 text-black"><i>___Where connection meets conversation</i></p>
-      </div>
+    <div className="flex w-full h-screen justify-center items-center ">
+      <div className="w-[50%] px-6  flex items-center justify-center text-[10vw] text-white   bg-[#00baff] h-full">
+          <div className="relative">
+            <i className="ri-chat-smile-3-fill text-[12vw] absolute top-[-60%] text-black right-0"></i>
+            connecText
+            <p className="text-[1.8vw] absolute bottom-0 ml-2 text-black">
+              <i>___Where connection meets conversation</i>
+            </p>
+          </div>
+        </div>
       <div className="flex h-screen w-[50%] flex-col items-center justify-center ">
         <form
           action=""
           onSubmit={handleRegister}
-          className="bg-white  flex flex-col gap-2 justify-end rounded-[3vw] w-[70%] px-8 pt-40 pb-10 relative"
+          className="bg-white  flex flex-col gap-2 justify-end rounded-[3vw] w-[70%] px-8 pt-40 pb-6 relative"
         >
           <h1 className="absolute top-0 left-[50%] translate-x-[-50%] text-[5vw] text-slate-400 py-4">
             Register
@@ -107,7 +111,7 @@ const Register = () => {
           </div>
           <div className="flex items-center justify-start gap-2">
             <button
-              className="text-[1.2vw] py-2 px-6 bg-[#00baff] text-white font-bold cursor-pointer w-[100%] rounded-sm"
+              className="text-[1.2vw] py-2 px-6 bg-[#00baff] hover:bg-[#0080ff] text-white font-bold cursor-pointer w-[100%] rounded-sm"
               type="submit"
             >
               Register
@@ -116,7 +120,11 @@ const Register = () => {
         </form>
         <p className="text-[1.2vw] py-2">
           Already have an account?{" "}
-          <Link className="text-white font-bold" to="/login" path={<Login />}>
+          <Link
+            className="text-[#0080ff] font-bold"
+            to="/login"
+            path={<Login />}
+          >
             Login
           </Link>
         </p>
