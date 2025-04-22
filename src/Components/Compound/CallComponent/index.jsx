@@ -150,34 +150,40 @@ const CallComponent = ({ socketRef, selectedUser, currentUserEmail }) => {
       socketRef.off("ice_candidate");
       socketRef.off("end_call");
     };
-  }, [socketRef]);
+  }, [socketRef, peerRef.current]);
 
   return (
-    <div className="flex justify-between px-2 bg-slate-500">
-      <div className="flex items-center justify-between py-2 w-[87%]">
+    <div className="flex w-[98%] gap-2 items-start justify-between px-2 bg-transparent absolute top-[7%]  right-0  z-[2]">
+      <div className="flex items-center justify-between w-[100%] py-2 ">
+        <div className="w-[48%] relative">
         <video
           ref={localVideoRef}
           autoPlay
           muted
           playsInline
-          className="w-[48%]"
+          className="w-[100%] "
         />
-        <video ref={remoteVideoRef} autoPlay playsInline className="w-[48%]" />
+        </div>
+        <div className="w-[48%] relative">
+        <video ref={remoteVideoRef} autoPlay playsInline className="w-[100%]" />
+        </div>
+        
+        
       </div>
-      <div className="py-2 w-[10%]">
+      <div className="py-2 w-[10%] relative">
         {!inCall ? (
           <button
             onClick={startCall}
-            className="bg-green-400 rounded-sm text-white h-full px-2 cursor-pointer"
+            className="bg-green-500 rounded-sm text-white  px-3 py-1 cursor-pointer absolute top-[-200%]"
           >
-            <i className="ri-phone-fill"></i>
+            <i class="ri-video-on-fill"></i>
           </button>
         ) : (
           <button
             onClick={endCall}
-            className="bg-red-400 rounded-sm text-white h-full px-2 cursor-pointer"
+            className="bg-red-400 rounded-sm text-white px-3 py-1 cursor-pointer absolute top-[-200%]"
           >
-            <i className="ri-phone-fill"></i>
+            <i class="ri-video-off-fill"></i>
           </button>
         )}
       </div>

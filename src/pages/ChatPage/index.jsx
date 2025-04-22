@@ -30,13 +30,13 @@ const ChatPage = () => {
 
   // clicked user details--------------------------------------------------------------SELECTED USER DETAILS
   const { selectedUser } = location.state || {};
-  
-  if (!selectedUser || !selectedUser?.email ) {
+
+  if (!selectedUser || !selectedUser?.email) {
     navigate("/");
   }
 
   // al users-------------------------------------------------------------------------ALL USERS
-  const { allUsers } = useContext(AllUsersContext);
+  const { allUsers, setUserList } = useContext(AllUsersContext);
   // const user = allUsers[2] || {};
 
   // -----------------------------------------------------------------------------------STATES
@@ -71,6 +71,8 @@ const ChatPage = () => {
   const socketRef = useRef();
   const fileInputRef = useRef();
 
+
+
   //get from UseFileUpload------------------------------------------------------------------useFILEUpload
   const {
     selectedFile,
@@ -80,6 +82,7 @@ const ChatPage = () => {
     handleUpload,
     setPreview,
   } = UseFileUpload(socketRef, SOCKET_SERVER_URL);
+
 
   //all chat messages--------------------------------------------------------------------ALL CHATS
   const allChatData = [...messages, ...files].sort(
@@ -189,8 +192,11 @@ const ChatPage = () => {
     return () => {
       socketRef.current.disconnect();
       socketRef.current.off("message_deleted");
+      socketRef.current.off("chat_list_updated");
     };
-  }, [currentUser]);
+  }, [currentUser, selectedUser]);
+
+  // *******************************useEffect End***************************************
 
   const handleTyping = () => {
     socketRef.current.emit("user_typing", currentUser);
@@ -249,23 +255,56 @@ const ChatPage = () => {
     });
   };
 
-  // message status request--------------------------------------------------------------------MESSAGE STATUS READ, SENT, DELEVIRED
+  // chat user list functions--------------------------------------------------------------------CHAT USER LIST FUNCTIONS
+  // add user
+  // const addUserList = (data) => {
+  //   socketRef.current.emit(
+  //     "add_to_chat_list",
+  //     { userEmail: currentUserEmail, addedUserEmail: data.email },
+  //     (res) => {
+  //       if (!res.success) {
+  //         alert("Error adding user to chat list", res.error);
+  //       }
+  //     }
+  //   );
+  // };
+
+  // // remove user
+  // const removeUserFromList=(data)=>{
+  //   socketRef.current.emit("remove_from_chat_list", { userEmail: currentUserEmail, addedUserEmail: data.email }, (res) => {
+  //     if (!res.success) {
+  //       alert("Error removing user from chat list: " + res.error);
+  //     }
+  //   });
+  // }
 
   return (
-    <div className="flex flex-col items-center  h-screen bg-gray-300">
-      <Header />
+    <div className="flex flex-col items-center w-[100%]  h-[100%] bg-gray-200 relative">
+      {/* call component--------------------------------------------------------- */}
+      <CallComponent
+        socketRef={socketRef.current}
+        selectedUser={selectedUser?.email}
+        currentUserEmail={currentUserEmail}
+      />
+      {/* <Header />
       <div className="flex justify-end items-center w-full bg-white py-2 px-6">
         <h2 className="text-xl text-[#00baff] font-bold">
           <Link to="/profile" path={<Profile />}>
             <i className="ri-user-6-fill"></i> {currentUser}
           </Link>
         </h2>
+      </div> */}
+      <div className="self-start min-h-[5%]  text-[1.8vw] flex w-full items-center justify-between gap-2 font-bold text-black px-2 my-2 rounded-sm overflow-hidden ">
+        <div className="flex items-center w-[20%] justify-start gap-2">
+          <img
+            src="https://cdn-icons-png.flaticon.com/512/219/219988.png"
+            className="w-[2.2vw] h-[2.2vw]"
+            alt="rececierImg"
+          />
+          {selectedUser?.username}
+        </div>
       </div>
-      <div className="self-start m-2 bg-black text-[1.6vw] font-bold text-white px-4 py-1 rounded-sm">
-        <span className="text-[.8vw]">Chatting with </span>
-        {selectedUser?.username}
-      </div>
-      <div className="flex flex-row items-start justify-center w-full h-[41vw]  pl-2 pr-2 pb-2 gap-2">
+      <div className="flex flex-col items-start justify-start w-full h-[95%]  px-2 ">
         {/* typing..  */}
         {/* {/* <div className=' py-1 px-3 bg-gray-300 mb-2'>
           {currentUser && <p>{currentUser} is typing...</p>}
@@ -273,7 +312,7 @@ const ChatPage = () => {
 
         {/* messages.. */}
         {/* messages..-------------------------------------------------------------------------------------- */}
-        <div className="bg-white p-4 w-[60%]  h-full   p-2 overflow-y-auto">
+        <div className="bg-white px-2 w-[100%]  h-[80%] py-2 overflow-y-auto">
           {sortedMessages.map((msg, index) => {
             const isCurrentUser = msg.senderName === currentUser;
 
@@ -322,6 +361,38 @@ const ChatPage = () => {
                     className="text-blue-500 underline relative inline-block"
                   >
                     📄 View PDF
+                    {isCurrentUser && (
+                      <span className="absolute bottom-[-0.7vw] text-[.5vw] bg-black text-white  right-0 px-1 rounded-sm">
+                        {msg.status === "sent" && "0"}
+                        {msg.status === "delivered" && "0 0"}
+                        {msg.status === "read" && "0 0 0"}
+                      </span>
+                    )}
+                    {isCurrentUser ? (
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault(); // stop anchor from triggering
+                          e.stopPropagation(); // stop bubbling up
+                          handleDeleteMessage(msg.messageId, msg.senderId);
+                        }}
+                        className="text-red-500 text-xs ml-2 absolute top-[-.8vw] right-[0vw] z-0 bg-red-500 rounded-sm flex items-center justify-center p-[.2vw] cursor-pointer"
+                      >
+                        <i className="ri-delete-bin-6-line text-[.6vw] text-white"></i>
+                      </button>
+                    ) : (
+                      ""
+                    )}
+                  </a>
+                );
+              } else if (msg.mimeType === "text/plain") {
+                return (
+                  <a
+                    href={msg.fileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 underline relative inline-block"
+                  >
+                    📄 View Txt File
                     {isCurrentUser && (
                       <span className="absolute bottom-[-0.7vw] text-[.5vw] bg-black text-white  right-0 px-1 rounded-sm">
                         {msg.status === "sent" && "0"}
@@ -419,8 +490,10 @@ const ChatPage = () => {
             return (
               <div
                 key={msg.messageId}
-                className={`p-1 mb-6 flex gap-2  ${
-                  isCurrentUser ? "justify-end w-[100%]" : "justify-start"
+                className={`p-1 mb-6 flex items-end gap-2  ${
+                  isCurrentUser
+                    ? "justify-end items-end w-[100%]"
+                    : "justify-start"
                 } justify-self-${isCurrentUser ? "end" : "start"}`}
               >
                 {isCurrentUser ? (
@@ -429,7 +502,7 @@ const ChatPage = () => {
                     {msg.messageType === "file" ? (
                       renderFile(msg, isCurrentUser)
                     ) : (
-                      <span className="text-[1.5vw] max-w-[60%] bg-blue-300 px-4 py-1 rounded-sm flex items-center justify-center relative">
+                      <span className="text-[1.5vw] max-w-[60%] bg-[#00baff]  px-4 py-1 rounded-sm flex items-center justify-center relative">
                         <ReactMarkdown rehypePlugins={[rehypeSanitize]}>
                           {msg.content}
                         </ReactMarkdown>
@@ -453,13 +526,13 @@ const ChatPage = () => {
                   </>
                 ) : (
                   <>
-                    <div className="flex items-center justify-center outline outline-black rounded-full px-4 bg-black text-white">
+                    {/* <div className="flex items-center justify-center outline outline-black rounded-full px-4 bg-black text-white">
                       {msg.senderName}
-                    </div>
+                    </div> */}
                     {msg.messageType === "file" ? (
                       renderFile()
                     ) : (
-                      <span className="text-[1.5vw] max-w-[60%] bg-orange-300 px-4 py-1 rounded-sm flex items-center justify-center">
+                      <span className="text-[1.5vw] max-w-[60%] bg-gray-600 text-white px-4 py-1 rounded-sm flex items-center justify-center">
                         <ReactMarkdown rehypePlugins={[rehypeSanitize]}>
                           {msg.content}
                         </ReactMarkdown>
@@ -474,16 +547,9 @@ const ChatPage = () => {
         </div>
 
         {/* input massages.. */}
-        <div className="flex flex-col justify-between  bottom-6 bg-gray-100 w-[40%] h-full  overflow-y-auto  rounded-sm   ">
-          {/* call component--------------------------------------------------------- */}
-            <CallComponent
-              socketRef = {socketRef.current}
-              selectedUser={selectedUser?.email}
-              currentUserEmail={currentUserEmail}
-            />
-
+        <div className="flex flex-row justify-between items-center    w-[100%]    overflow-y-auto  rounded-sm   ">
           <form
-            className="w-full flex flex-col items-center justify-between px-2"
+            className="w-full flex flex-row items-center justify-between pr-2 relative"
             onSubmit={sendMessage}
           >
             {/* <div className="w-full focus:outline-none  py-4 px-2 text-wrap">
@@ -494,8 +560,8 @@ const ChatPage = () => {
               />
             </div> */}
 
-            <textarea
-              className="w-[100%]  focus:outline-none  py-4 px-2 text-wrap bg-white"
+            <input
+              className="w-[100%]  focus:outline-none rounded-sm  py-2 px-2 text-wrap bg-white"
               rows={4}
               type="text"
               value={message}
@@ -504,7 +570,7 @@ const ChatPage = () => {
             />
 
             {/* previews--------------------------------------------------------------------- */}
-            <div className="flex flex-wrap gap-4 my-4">
+            <div className="flex flex-wrap gap-2 py-4 absolute bottom-[-120%] z-[9999]">
               {preview.map((file, index) => (
                 <div
                   key={index}
@@ -531,7 +597,7 @@ const ChatPage = () => {
                     </p>
                   )}
                   {file.type === "other" && (
-                    <p className="w-[100%] h-[100%] rounded-lg">
+                    <p className="w-[100%] h-[100%] rounded-lg bg-gray-300 p-2">
                       {file.name} (Other)
                     </p>
                   )}
@@ -547,7 +613,7 @@ const ChatPage = () => {
               ))}
             </div>
 
-            <div className="w-[20%] focus:outline-none text-sm  py-4 px-2 flex items-center justify-center ">
+            <div className="w-[10%] focus:outline-none text-sm  py-4 px-2 flex items-center justify-center ">
               <input
                 className="hidden"
                 id="inputFile"
@@ -566,11 +632,10 @@ const ChatPage = () => {
 
             <button
               type="submit"
-              className="w-[100%] cursor-pointer hover:font-bold bg-black text-white py-2 rounded-lg group relative "
+              className="w-[20%] cursor-pointer hover:font-bold bg-black text-white py-2 rounded-lg group relative "
               onClick={sendMessage}
             >
-              Send{" "}
-              <i className="ri-send-plane-fill group-hover:right-20 transition-all duration-700 absolute  "></i>
+              Send <i className="ri-send-plane-fill  "></i>
             </button>
             {/* <button onClick={sendMessage}>Send</button> */}
           </form>
