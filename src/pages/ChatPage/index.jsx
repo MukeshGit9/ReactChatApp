@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useMemo, useContext } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { AllUsersContext } from "../../Context/AllUsersProvider";
 import ReactMarkdown from "react-markdown";
@@ -8,7 +8,6 @@ import "easymde/dist/easymde.min.css"; // Required CSS
 import UseFileUpload from "../../utilities/UseFileUpload";
 import socketIOClient from "socket.io-client";
 import axios from "axios";
-import { v4 as uuidv4 } from "uuid";
 import Header from "../../Components/Compound/Header";
 import NavLink from "../../Components/Atom/NavLink";
 import Profile from "../Profile";
@@ -36,7 +35,6 @@ const ChatPage = () => {
   }
 
   // al users-------------------------------------------------------------------------ALL USERS
-  const { allUsers, setUserList } = useContext(AllUsersContext);
   // const user = allUsers[2] || {};
 
   // -----------------------------------------------------------------------------------STATES
@@ -45,7 +43,6 @@ const ChatPage = () => {
   const [files, setFiles] = useState([]);
   const [currentUser, setCurrentUser] = useState("");
   const [currentUserEmail, setCurrentUserEmail] = useState("");
-  const [token, setToken] = useState(null);
   const [typingUser, setTypingUser] = useState("");
 
   // useEffect(() => {
@@ -313,7 +310,7 @@ const ChatPage = () => {
         {/* messages.. */}
         {/* messages..-------------------------------------------------------------------------------------- */}
         <div className="bg-white px-2 w-[100%]  h-[80%] py-2 overflow-y-auto">
-          {sortedMessages.map((msg, index) => {
+          {sortedMessages.map((msg) => {
             const isCurrentUser = msg.senderName === currentUser;
 
             const renderFile = () => {
